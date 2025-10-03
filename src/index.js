@@ -1,15 +1,16 @@
 const express = require('express')
 const dotenv = require('dotenv');
 const cors = require('cors');
+
+dotenv.config();
+
 const logger = require('./helpers/logger');
 
 const auth = require('./routes/AuthRoutes');
 const user = require('./routes/UserRoutes');
 
 const app = express()
-const port = 9000
-
-dotenv.config()
+const port = process.env.PORT || 9000
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));

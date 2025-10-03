@@ -23,7 +23,6 @@ const postLogin = async (request, reply) => {
 
     await UserSession.destroy({ where: { email } });
     const dtAccess = {email, roleId : user.role_id};
-    console.log("dtAccess", dtAccess);
     const token = await JwtHelpers.generateToken(dtAccess);
     await UserSession.create({
       email: user.email,
