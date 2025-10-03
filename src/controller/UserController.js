@@ -1,0 +1,70 @@
+const { StatusCodes } = require('http-status-codes');
+const bcrypt = require('bcrypt');
+
+const { User } = require("../models");
+
+const Logger = require('../helpers/logger');
+
+const logName = 'API User';
+
+let users = [];
+
+const postUser = async (request, reply) => {
+  try {
+    const { email, name, password, roleId } = request.body;
+
+    const newUser = {
+      email,
+      full_name: name,
+      role_id: roleId,
+      password_hash: await bcrypt.hash(password, 10)
+    };
+
+    users.push(newUser);
+    await User.create(newUser)
+    return reply
+    .status(StatusCodes.CREATED)
+    .send({
+      responseCode: StatusCodes.CREATED,
+      responseDesc: "Data berhasil disimpan"
+  });
+  } catch (err) {
+    Logger.log([logName, 'POST User', 'ERROR'], {
+      message: `${err}`,
+    });
+    return reply
+      .status(StatusCodes.INTERNAL_SERVER_ERROR)
+      .send({
+        responseCode: StatusCodes.INTERNAL_SERVER_ERROR,
+        responseDesc: "Data gagal disimpan"
+    });
+  }
+};
+
+const getUser = async (request, reply) => {
+  try {
+
+    return reply
+    .status(StatusCodes.OK)
+    .send({
+      responseCode: StatusCodes.OK,
+      responseDesc: "Berhasil mengambil data",
+      data: users
+  });
+  } catch (err) {
+    Logger.log([logName, 'GET User', 'ERROR'], {
+      message: `${err}`,
+    });
+    return reply
+      .status(StatusCodes.INTERNAL_SERVER_ERROR)
+      .send({
+        responseCode: StatusCodes.INTERNAL_SERVER_ERROR,
+        responseDesc: "Gagal mengambil data"
+    });
+  }
+};
+
+module.exports = {
+  postUser,
+  getUser
+};
