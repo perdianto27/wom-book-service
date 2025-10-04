@@ -7,14 +7,18 @@ const context = "middlewareAuth";
 
 const { UserSession } = require("../../models");
 
-const verifyBasic = () => {
+const verifyBasic = (roles = [], { optional = false } = {}) => {
   const ctx = `${context}.verifyBasic`;
 
   return async (request, reply, next) => {
     try {
       const authHeader = request.header("Authorization");
-
       if (!authHeader || !authHeader.startsWith("Bearer ")) {
+        if (optional) {
+          request.user = null;
+
+          return next();
+        }
         return reply.status(StatusCodes.UNAUTHORIZED).send({
           responseCode: StatusCodes.UNAUTHORIZED,
           responseDesc: "Missing or invalid Authorization header",
@@ -33,9 +37,17 @@ const verifyBasic = () => {
           responseDesc: "Session expired or logged out",
         });
       }
+      console.log("decoded token", decoded);
+      if (roles.length && !roles.includes(decoded.roleId)) {
+        return reply.status(StatusCodes.FORBIDDEN).json({
+          responseCode: StatusCodes.FORBIDDEN,
+          responseDesc: "Access denied: insufficient permissions",
+        });
+      }
 
       request.user = decoded;
 
+      next();
     } catch (err) {
       Logger.log([ctx, "Error verify basic", "ERROR"], {
         error: `${err}`,
@@ -53,8 +65,6 @@ const verifyBasic = () => {
         responseDesc: "Unauthorized",
       });
     }
-
-    next();
   };
 };
 
