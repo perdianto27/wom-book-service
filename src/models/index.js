@@ -7,13 +7,25 @@ const UserSession = require("./UserSession")(sequelize, Sequelize.DataTypes);
 const Book = require("./Book")(sequelize, Sequelize.DataTypes);
 const Cart = require("./Cart")(sequelize, Sequelize.DataTypes);
 const CartItem = require("./CartItem")(sequelize, Sequelize.DataTypes);
+const Order = require("./Order")(sequelize, Sequelize.DataTypes);
+const OrderItem = require("./OrderItem")(sequelize, Sequelize.DataTypes);
 
-module.exports = {
+const db = {
   sequelize,
   User,
   Role,
   UserSession,
   Book,
   Cart,
-  CartItem
+  CartItem,
+  Order,
+  OrderItem
 };
+
+Object.keys(db).forEach((modelName) => {
+  if (db[modelName].associate) {
+    db[modelName].associate(db);
+  }
+});
+
+module.exports = db;

@@ -5,6 +5,12 @@ const addCartValidation = Joi.object({
   quantity: Joi.number().integer().min(1).default(1)
 });
 
+const checkoutCartValidation = Joi.object({
+  paymentChannel: Joi.string().required(),
+  paymentReference: Joi.string()
+});
+
 module.exports = {
-  addCartValidation
+  addCartValidation,
+  checkoutCartValidation
 };

@@ -1,10 +1,8 @@
 const { StatusCodes } = require('http-status-codes');
 
-const { Book,Cart, CartItem } = require("../models");
-
 const Logger = require('../helpers/logger');
 
-const { addToCartService, removeFromCartService } = require('../services/CartService');
+const { addToCartService, removeFromCartService, checkoutCartService } = require('../services/CartService');
 
 const logName = 'API Cart';
 
@@ -61,7 +59,37 @@ const removeFromCart = async (request, reply) => {
   }
 };
 
+const postCheckoutCart = async (request, reply) => {
+  try {
+    const { paymentChannel, paymentReference } = request.body;
+    const email = request.user.email;
+
+    const order = await checkoutCartService (email, paymentChannel, paymentReference);
+
+    return reply
+    .status(StatusCodes.OK)
+    .send({
+      responseCode: StatusCodes.OK,
+      responseDesc: 'Checkout berhasil',
+      data: order
+    });
+  } catch (err) {
+    Logger.log([logName, 'POST Checkout Cart', 'ERROR'], {
+        message: `${err}`,
+    });
+    const statusCode = err.statusCode || StatusCodes.INTERNAL_SERVER_ERROR;
+    return reply
+      .status(statusCode)
+      .send({
+        responseCode: statusCode,
+        responseDesc: err.message || "Terjadi kesalahan pada server"
+    });
+  }
+};
+
+
 module.exports = {
   addToCart,
-  removeFromCart
+  removeFromCart,
+  postCheckoutCart
 };

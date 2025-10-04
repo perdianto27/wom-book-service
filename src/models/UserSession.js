@@ -34,7 +34,7 @@ module.exports = (sequelize, DataTypes) => {
   // Relasi ke User
   UserSession.associate = (models) => {
     UserSession.belongsTo(models.User, {
-      foreignKey: "user_id",
+      foreignKey: "email",
       as: "user"
     });
   };
