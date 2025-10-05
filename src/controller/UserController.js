@@ -10,11 +10,12 @@ const logName = 'API User';
 let users = [];
 
 const postUser = async (request, reply) => {
+  const ctx = `${logName}-postUser`;
   try {
     const { email, name, password, roleId } = request.body;
 
     const newUser = {
-      email,
+      // email,
       full_name: name,
       role_id: roleId,
       password_hash: await bcrypt.hash(password, 10)
@@ -29,9 +30,10 @@ const postUser = async (request, reply) => {
       responseDesc: "Data berhasil disimpan"
   });
   } catch (err) {
-    Logger.log([logName, 'POST User', 'ERROR'], {
+    Logger.log([ctx, 'POST User', 'ERROR'], {
       message: `${err}`,
     });
+    Logger.logToDB(ctx, err, request);
     return reply
       .status(StatusCodes.INTERNAL_SERVER_ERROR)
       .send({

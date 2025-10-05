@@ -1,5 +1,7 @@
 const pino = require('pino');
 
+const { ErrorLog } = require('../models'); 
+
 const isDev = process.env.NODE_ENV !== 'production';
 
 let logger;
@@ -46,5 +48,19 @@ const httpLogger = (req, res, next) => {
 
   next();
 };
+const logToDB = async (ctx, err, req) => {
+  try {
+    await ErrorLog.create({
+      route: req.originalUrl,
+      method: req.method,
+      context: ctx,
+      payload: JSON.stringify(req.body || req.query || {}),
+      message: err.message,
+      stack_trace: err.stack
+    });
+  } catch (e) {
+    logger.info(`Gagal log error ke DB: ${e}`);
+  }
+};
 
-module.exports = { log, httpLogger };
+module.exports = { log, httpLogger, logToDB };

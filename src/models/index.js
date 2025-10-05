@@ -10,6 +10,8 @@ const CartItem = require("./CartItem")(sequelize, Sequelize.DataTypes);
 const Order = require("./Order")(sequelize, Sequelize.DataTypes);
 const OrderItem = require("./OrderItem")(sequelize, Sequelize.DataTypes);
 
+const ErrorLog = require("./ErrorLog")(sequelize, Sequelize.DataTypes);
+
 const db = {
   sequelize,
   User,
@@ -19,7 +21,8 @@ const db = {
   Cart,
   CartItem,
   Order,
-  OrderItem
+  OrderItem,
+  ErrorLog
 };
 
 Object.keys(db).forEach((modelName) => {
