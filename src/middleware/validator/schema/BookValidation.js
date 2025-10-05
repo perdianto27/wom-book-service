@@ -11,6 +11,11 @@ const postBook = Joi.object({
   is_active: Joi.boolean().default(true)
 });
 
+const updateStockValidation = Joi.object({
+  quantityChange: Joi.number().required()
+});
+
 module.exports = {
-  postBook
+  postBook,
+  updateStockValidation
 };

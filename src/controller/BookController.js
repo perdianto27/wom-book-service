@@ -38,7 +38,7 @@ const getBooks = async (request, reply) => {
   try {
     const { roleId } = request.user;
     
-    let where = { is_active: true };
+    let where = {};
     if (roleId === ROLE.ID.CUSTOMER) {
       where = { stock: { [Op.gt]: 0 }, is_active: true };
     }
@@ -134,9 +134,57 @@ const deleteBookById = async (request, reply) => {
   }
 };
 
+const updateBookStock = async (request, reply) => {
+  try {
+    const { id } = request.params;
+    const { quantityChange } = request.body;
+
+    const book = await Book.findByPk(id);
+
+    if (!book) {
+      return reply.status(StatusCodes.NOT_FOUND).send({
+        responseCode: StatusCodes.NOT_FOUND,
+        responseDesc: 'Buku tidak ditemukan'
+      });
+    }
+    const newStock = book.stock + quantityChange;
+
+    if (newStock < 0) {
+      return reply.status(StatusCodes.BAD_REQUEST).send({
+        responseCode: StatusCodes.BAD_REQUEST,
+        responseDesc: 'Stok tidak boleh kurang dari 0'
+      });
+    }
+
+    book.stock = newStock;
+    await book.save();
+
+    return reply.status(StatusCodes.OK).send({
+      responseCode: StatusCodes.OK,
+      responseDesc: 'Stok buku berhasil diperbarui',
+      data: {
+        book_id: book.id,
+        title: book.title,
+        old_stock: book.stock - quantityChange,
+        new_stock: book.stock,
+        change: quantityChange
+      }
+    });
+
+  } catch (error) {
+    Logger.log([logName, "UPDATE Stock", "ERROR"], { message: `${error}` });
+    
+    return reply.status(StatusCodes.INTERNAL_SERVER_ERROR).send({
+      responseCode: StatusCodes.INTERNAL_SERVER_ERROR,
+      responseDesc: "Gagal update stock"
+    });
+  }
+};
+
 module.exports = {
   postBook,
   getBooks,
   getBookById,
-  deleteBookById
+  deleteBookById,
+  updateBookStock
 };
