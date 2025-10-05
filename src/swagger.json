@@ -1,0 +1,278 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "WOM Book Service API",
+    "version": "1.0.0",
+    "description": "API untuk WOM Book Store"
+  },
+  "servers": [
+    {
+      "url": "http://localhost:9000",
+      "description": "Local server"
+    }
+  ],
+  "components": {
+    "securitySchemes": {
+      "bearerAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT"
+      }
+    },
+    "schemas": {
+      "Book": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string", "format": "uuid" },
+          "title": { "type": "string" },
+          "author": { "type": "string" },
+          "publisher": { "type": "string" },
+          "price": { "type": "number" },
+          "stock": { "type": "integer" },
+          "is_active": { "type": "boolean" }
+        }
+      },
+      "CartItem": {
+        "type": "object",
+        "properties": {
+          "bookId": { "type": "string", "format": "uuid" },
+          "quantity": { "type": "integer" }
+        }
+      },
+      "CheckoutRequest": {
+        "type": "object",
+        "properties": {
+          "paymentChannel": { "type": "string" },
+          "paymentReference": { "type": "string" }
+        },
+        "required": ["paymentChannel"]
+      }
+    }
+  },
+  "security": [
+    { "bearerAuth": [] }
+  ],
+  "paths": {
+    "/user": {
+      "post": {
+        "tags": ["User"],
+        "summary": "Create a new user",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "email": { "type": "string", "format": "email" },
+                  "roleId": { "type": "integer" },
+                  "name": { "type": "string" },
+                  "password": { "type": "string" }
+                },
+                "required": ["email", "roleId", "name", "password"],
+                "example": {
+                  "email": "endo@gmail.com",
+                  "roleId": 1,
+                  "name": "Endo",
+                  "password": "Password2025"
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": { "description": "User berhasil dibuat" },
+          "400": { "description": "email is required" }
+        }
+      }
+    },
+    "/auth/login": {
+      "post": {
+        "tags": ["User"],
+        "summary": "Login user",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "email": { "type": "string" },
+                  "password": { "type": "string" }
+                },
+                "required": ["email","password"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "Login berhasil" },
+          "401": { "description": "Email atau password salah" }
+        }
+      }
+    },
+    "/book": {
+      "get": {
+        "tags": ["Buku"],
+        "summary": "List buku",
+        "responses": {
+          "200": { "description": "Daftar buku tersedia" }
+        }
+      },
+      "post": {
+        "tags": ["Buku"],
+        "summary": "Tambah buku (admin)",
+        "security": [{ "bearerAuth": [] }],
+        "requestBody": {
+          "required": true,
+          "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Book" } } }
+        },
+        "responses": {
+          "200": { "description": "Buku berhasil ditambahkan" }
+        }
+      }
+    },
+    "/book/{id}": {
+      "patch": {
+        "tags": ["Buku"],
+        "summary": "Non-aktifkan buku (admin)",
+        "security": [{ "bearerAuth": [] }],
+        "parameters": [
+          { "name": "id", "in": "path", "required": true, "schema": { "type": "string" } }
+        ],
+        "responses": {
+          "200": { "description": "Buku berhasil dihapus (is_active=false)" }
+        }
+      }
+    },
+    "/book/{id}/stock": {
+      "patch": {
+        "tags": ["Buku"],
+        "summary": "Update stock buku (admin)",
+        "security": [{ "bearerAuth": [] }],
+        "parameters": [
+          { "name": "id", "in": "path", "required": true, "schema": { "type": "string" } }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": { "application/json": { "schema": { "type": "object",
+          "properties": { "quantityChange": { "type": "integer" } }, "required": ["quantityChange"],"example": {"quantityChange": -2 } } } }
+        },
+        "responses": { "200": { "description": "Stock buku berhasil diperbarui" } }
+      }
+    },
+    "/cart": {
+      "post": {
+        "tags": ["Keranjang"],
+        "summary": "Tambah buku ke keranjang",
+        "security": [{ "bearerAuth": [] }],
+        "requestBody": {
+          "required": true,
+          "content": { "application/json": { "schema": { "$ref": "#/components/schemas/CartItem" } } }
+        },
+        "responses": { "200": { "description": "Buku berhasil ditambahkan ke keranjang" } }
+      }
+    },
+    "/cart/item/{bookId}": {
+      "delete": {
+        "tags": ["Keranjang"],
+        "summary": "Hapus buku dari keranjang",
+        "security": [{ "bearerAuth": [] }],
+        "parameters": [
+          { "name": "bookId", "in": "path", "required": true, "schema": { "type": "string" } }
+        ],
+        "responses": { "200": { "description": "Buku berhasil dihapus dari keranjang" } }
+      }
+    },
+    "/cart/checkout": {
+      "post": {
+        "tags": ["Keranjang"],
+        "summary": "Checkout keranjang",
+        "security": [{ "bearerAuth": [] }],
+        "requestBody": {
+          "required": true,
+          "content": { "application/json": { "schema": { "$ref": "#/components/schemas/CheckoutRequest" } } }
+        },
+        "responses": { "200": { "description": "Checkout berhasil" } }
+      }
+    },
+    "/payment": {
+      "post": {
+        "tags": ["Pembayaran"],
+        "summary": "Buat payment link",
+        "security": [{ "bearerAuth": [] }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "orderId": { "type": "string" },
+                  "paymentChannel": { "type": "string" }
+                },
+                "required": ["orderId"],
+                "example": {
+                  "orderId": "d8467590-0976-47df-a26b-048b27b6a423",
+                  "paymentChannel": "linkaja"
+                }
+              }
+            }
+          }
+        },
+        "responses": { "200": { "description": "Link pembayaran dibuat" } }
+      }
+    },
+    "/payment/callback": {
+      "post": {
+        "tags": ["Pembayaran"],
+        "summary": "Buat payment callback",
+        "security": [{ "bearerAuth": [] }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "orderId": { "type": "string" },
+                  "status": { "type": "string" }
+                },
+                "required": ["email", "roleId", "name", "password"],
+                "example": {
+                  "orderId": "d8467590-0976-47df-a26b-048b27b6a423",
+                  "status": "paid"
+                }
+              }
+            }
+          }
+        },
+        "responses": { "200": { "description": "Link pembayaran dibuat" } }
+      }
+    },
+    "/report/checkout-list": {
+      "get": {
+        "tags": ["Laporan"],
+        "summary": "List transaksi checkout",
+        "security": [{ "bearerAuth": [] }],
+        "responses": { "200": { "description": "List transaksi checkout" } }
+      }
+    },
+    "/report/sales": {
+      "get": {
+        "tags": ["Laporan"],
+        "summary": "List laporan penjualan",
+        "security": [{ "bearerAuth": [] }],
+        "responses": { "200": { "description": "List laporan penjualan" } }
+      }
+    },
+    "/report/sales/download": {
+      "get": {
+        "tags": ["Laporan"],
+        "summary": "Download laporan penjualan Excel",
+        "security": [{ "bearerAuth": [] }],
+        "responses": { "200": { "description": "File Excel di-download" } }
+      }
+    }
+  }
+}

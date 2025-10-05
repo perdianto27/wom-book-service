@@ -5,6 +5,7 @@ const cors = require('cors');
 dotenv.config();
 
 const logger = require('./helpers/logger');
+const isProduction = process.env.NODE_ENV === 'production';
 
 const routes = require('./routes'); 
 
@@ -15,6 +16,9 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cors());
 app.use(logger.httpLogger);
+
+// Swagger + Redoc (hanya jika bukan production)
+require('./middleware/swagger')(app, isProduction);
 
 app.use(routes);
 

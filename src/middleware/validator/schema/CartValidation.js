@@ -7,7 +7,7 @@ const addCartValidation = Joi.object({
 
 const checkoutCartValidation = Joi.object({
   paymentChannel: Joi.string().required(),
-  paymentReference: Joi.string()
+  paymentReference: Joi.string().optional().allow('', null)
 });
 
 module.exports = {

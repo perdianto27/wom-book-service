@@ -45,7 +45,7 @@ const postUser = async (request, reply) => {
 
 const getUser = async (request, reply) => {
   try {
-
+    const users = await User.findAll();
     return reply
     .status(StatusCodes.OK)
     .send({
