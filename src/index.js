@@ -11,6 +11,7 @@ const user = require('./routes/UserRoutes');
 const book = require('./routes/BookRoutes');
 const cart = require('./routes/CartRoutes');
 const payment = require('./routes/PaymentRoutes');
+const report = require('./routes/ReportRoutes');
 
 const app = express()
 const port = process.env.PORT || 9000
@@ -25,6 +26,7 @@ app.use('/user', user);
 app.use('/book', book);
 app.use('/cart', cart);
 app.use('/payment', payment);
+app.use('/report', report);
 
 app.listen(port, () => {
   console.log(`Server started on port ${port}`);
