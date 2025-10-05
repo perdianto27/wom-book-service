@@ -84,6 +84,13 @@
           "201": { "description": "User berhasil dibuat" },
           "400": { "description": "email is required" }
         }
+      },
+      "get": {
+        "tags": ["User"],
+        "summary": "List User",
+        "responses": {
+          "200": { "description": "Daftar list user" }
+        }
       }
     },
     "/auth/login": {

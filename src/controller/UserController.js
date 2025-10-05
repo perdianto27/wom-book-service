@@ -1,13 +1,11 @@
 const { StatusCodes } = require('http-status-codes');
 const bcrypt = require('bcrypt');
 
-const { User } = require("../models");
+const { User, Role } = require("../models");
 
 const Logger = require('../helpers/logger');
 
 const logName = 'API User';
-
-let users = [];
 
 const postUser = async (request, reply) => {
   const ctx = `${logName}-postUser`;
@@ -21,7 +19,6 @@ const postUser = async (request, reply) => {
       password_hash: await bcrypt.hash(password, 10)
     };
 
-    users.push(newUser);
     await User.create(newUser)
     return reply
     .status(StatusCodes.CREATED)
@@ -45,7 +42,16 @@ const postUser = async (request, reply) => {
 
 const getUser = async (request, reply) => {
   try {
-    const users = await User.findAll();
+    const users = await User.findAll({
+      include: [
+        {
+          model: Role,
+          as: 'role',
+          attributes: ['id', 'name']
+        }
+      ]
+    });
+
     return reply
     .status(StatusCodes.OK)
     .send({
