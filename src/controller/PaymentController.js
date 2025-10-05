@@ -1,5 +1,5 @@
 const { StatusCodes } = require("http-status-codes");
-const { createPaymentService, paymentCallbackService } = require("../services/paymentService");
+const { createPaymentService, paymentCallbackService } = require("../services/PaymentService");
 const Logger = require("../helpers/logger");
 
 const logName = "API Payment";

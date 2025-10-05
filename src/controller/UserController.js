@@ -15,7 +15,7 @@ const postUser = async (request, reply) => {
     const { email, name, password, roleId } = request.body;
 
     const newUser = {
-      // email,
+      email,
       full_name: name,
       role_id: roleId,
       password_hash: await bcrypt.hash(password, 10)
